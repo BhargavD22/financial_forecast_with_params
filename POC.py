@@ -27,7 +27,7 @@ def get_snowflake_data():
     return df
 
 # === Streamlit App UI === #
-st.title("📈 Financial Forecasting App (Snowflake + Prophet)")
+st.title("📈 Financial Forecasting App built on top of Snowflake Data")
 st.markdown("This app retrieves financial data from Snowflake and forecasts future revenue using Prophet.")
 
 # Forecast input
@@ -113,3 +113,4 @@ st.dataframe(
 # === Export as CSV === #
 csv = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_days).to_csv(index=False)
 st.download_button("⬇️ Download Forecast CSV", csv, "forecast.csv", "text/csv")
+
