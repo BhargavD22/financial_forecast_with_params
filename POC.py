@@ -17,10 +17,10 @@ def get_snowflake_data():
         schema=st.secrets["SCHEMA"]
     )
     query = """
-        SELECT date, revenue
-        FROM financial_data
-        WHERE date >= '2020-01-01'
-        ORDER BY date;
+        SELECT ds,y
+        FROM forecast_data
+        WHERE ds >= '2020-01-01'
+        ORDER BY ds;
     """
     df = pd.read_sql(query, conn)
     conn.close()
@@ -41,7 +41,7 @@ st.subheader("📊 Historical Data")
 st.line_chart(df.set_index('date')['revenue'])
 
 # Prepare and fit model
-df = df.rename(columns={"date": "ds", "revenue": "y"})
+#df = df.rename(columns={"date": "ds", "revenue": "y"})
 df['ds'] = pd.to_datetime(df['ds'])
 
 model = Prophet()
@@ -75,3 +75,4 @@ st.dataframe(
 # Export forecast as CSV
 csv = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_days).to_csv(index=False)
 st.download_button("⬇️ Download Forecast CSV", csv, "forecast.csv", "text/csv")
+
