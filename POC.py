@@ -17,7 +17,7 @@ def get_snowflake_data():
         schema=st.secrets["SCHEMA"]
     )
     query = """
-        SELECT ds,y
+        SELECT ds, y
         FROM forecast_data
         WHERE ds >= '2020-01-01'
         ORDER BY ds;
@@ -38,21 +38,18 @@ with st.spinner("Connecting to Snowflake and fetching data..."):
     df = get_snowflake_data()
 
 st.subheader("📊 Historical Data")
+df['ds'] = pd.to_datetime(df['ds'])  # Ensure datetime format
 st.line_chart(df.set_index('ds')['y'])
 
-# Prepare and fit model
-df = df.rename(columns={"ds": "ds", "y": "y"})
-df['ds'] = pd.to_datetime(df['ds'])
-
-
+# Fit model
 model = Prophet()
 model.fit(df)
 
-# Forecast future
+# Forecast
 future = model.make_future_dataframe(periods=forecast_days)
 forecast = model.predict(future)
 
-# Show forecast chart
+# Plot forecast
 st.subheader("🔮 Forecasted Revenue")
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat'], name='Forecast'))
@@ -60,7 +57,7 @@ fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat_upper'], name='Upper
 fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat_lower'], name='Lower Bound', line=dict(dash='dot')))
 st.plotly_chart(fig, use_container_width=True)
 
-# Display forecast table
+# Forecast Table
 st.subheader("🧾 Forecast Table")
 st.dataframe(
     forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_days).rename(
@@ -73,9 +70,6 @@ st.dataframe(
     )
 )
 
-# Export forecast as CSV
+# Export as CSV
 csv = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_days).to_csv(index=False)
 st.download_button("⬇️ Download Forecast CSV", csv, "forecast.csv", "text/csv")
-
-
-
