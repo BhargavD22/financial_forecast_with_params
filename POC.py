@@ -9,12 +9,12 @@ import plotly.graph_objects as go
 @st.cache_data
 def get_snowflake_data():
     conn = snowflake.connector.connect(
-        user='DATATEAM',
-        password='Miracle@#$5648',
-        account='HUQCHBA-QA55890.snowflakecomputing.com',
-        warehouse='COMPUTE_WH',
-        database='FORECAST_DB',
-        schema='FORECAST_SCHEMA'
+        user=st.secrets["USER"],
+        password=st.secrets["PASSWORD"],
+        account=st.secrets["ACCOUNT"],
+        warehouse=st.secrets["WAREHOUSE"],
+        database=st.secrets["DATABASE"],
+        schema=st.secrets["SCHEMA"]
     )
     query = """
         SELECT date, revenue
@@ -61,17 +61,17 @@ st.plotly_chart(fig, use_container_width=True)
 
 # Display forecast table
 st.subheader("🧾 Forecast Table")
-st.dataframe(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_days).rename(
-    columns={
-        "ds": "Date",
-        "yhat": "Predicted Revenue",
-        "yhat_lower": "Lower Bound",
-        "yhat_upper": "Upper Bound"
-    }
-))
+st.dataframe(
+    forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_days).rename(
+        columns={
+            "ds": "Date",
+            "yhat": "Predicted Revenue",
+            "yhat_lower": "Lower Bound",
+            "yhat_upper": "Upper Bound"
+        }
+    )
+)
 
 # Export forecast as CSV
 csv = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_days).to_csv(index=False)
 st.download_button("⬇️ Download Forecast CSV", csv, "forecast.csv", "text/csv")
-
-
