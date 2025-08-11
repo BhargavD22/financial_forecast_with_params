@@ -8,12 +8,12 @@ import plotly.graph_objects as go
 @st.cache_data
 def get_snowflake_data():
     conn = snowflake.connector.connect(
-        user='<your_username>',
-        password='<your_password>',
-        account='<your_account>.snowflakecomputing.com',
-        warehouse='<your_warehouse>',
-        database='<your_database>',
-        schema='<your_schema>'
+        user='DATATEAM',
+        password='Miracle@#$5648',
+        account='HUQCHBA-QA55890.snowflakecomputing.com',
+        warehouse='COMPUTE_WH',
+        database='FORECAST_DB',
+        schema='FORECAST_SCHEMA'
     )
     query = """
         SELECT date, revenue
@@ -72,3 +72,4 @@ st.dataframe(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_
 # Export forecast as CSV
 csv = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_days).to_csv(index=False)
 st.download_button("⬇️ Download Forecast CSV", csv, "forecast.csv", "text/csv")
+
