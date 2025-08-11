@@ -38,11 +38,12 @@ with st.spinner("Connecting to Snowflake and fetching data..."):
     df = get_snowflake_data()
 
 st.subheader("📊 Historical Data")
-st.line_chart(df.set_index('date')['revenue'])
+st.line_chart(df.set_index('ds')['y'])
 
 # Prepare and fit model
 #df = df.rename(columns={"date": "ds", "revenue": "y"})
 df['ds'] = pd.to_datetime(df['ds'])
+
 
 model = Prophet()
 model.fit(df)
@@ -75,4 +76,5 @@ st.dataframe(
 # Export forecast as CSV
 csv = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_days).to_csv(index=False)
 st.download_button("⬇️ Download Forecast CSV", csv, "forecast.csv", "text/csv")
+
 
