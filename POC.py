@@ -27,7 +27,7 @@ def get_snowflake_data():
     return df
 
 # === Streamlit App UI === #
-st.title("📈 36-Month Financial Forecast (Snowflake + Prophet)")
+st.title("📈 36-Month Financial Forecast")
 st.markdown("This app retrieves financial data from Snowflake and forecasts the next 36 months using Prophet.")
 
 # Load data
@@ -111,3 +111,4 @@ st.dataframe(
 # === Export as CSV === #
 csv = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_period_days).to_csv(index=False)
 st.download_button("⬇️ Download 36-Month Forecast CSV", csv, "forecast_36_months.csv", "text/csv")
+
