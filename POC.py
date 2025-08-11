@@ -50,15 +50,54 @@ model.fit(df)
 future = model.make_future_dataframe(periods=forecast_days)
 forecast = model.predict(future)
 
-# Show forecast chart
-st.subheader("🔮 Forecasted Revenue")
+# === NEW: Best fit forecast chart with shaded confidence interval === #
+st.subheader("🔮 Forecasted Revenue (Best Fit Line)")
+
+# Separate historical and forecast parts
+historical = forecast[forecast['ds'] <= df['ds'].max()]
+future_forecast = forecast[forecast['ds'] > df['ds'].max()]
+
 fig = go.Figure()
-fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat'], name='Forecast'))
-fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat_upper'], name='Upper Bound', line=dict(dash='dot')))
-fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat_lower'], name='Lower Bound', line=dict(dash='dot')))
+
+# Historical line
+fig.add_trace(go.Scatter(
+    x=historical['ds'], y=historical['yhat'],
+    mode='lines',
+    name='Historical',
+    line=dict(color='blue', width=2)
+))
+
+# Forecast line
+fig.add_trace(go.Scatter(
+    x=future_forecast['ds'], y=future_forecast['yhat'],
+    mode='lines',
+    name='Forecast',
+    line=dict(color='red', width=3, dash='dash')
+))
+
+# Confidence interval shading
+fig.add_trace(go.Scatter(
+    x=list(future_forecast['ds']) + list(future_forecast['ds'])[::-1],
+    y=list(future_forecast['yhat_upper']) + list(future_forecast['yhat_lower'])[::-1],
+    fill='toself',
+    fillcolor='rgba(255, 0, 0, 0.2)',
+    line=dict(color='rgba(255,255,255,0)'),
+    hoverinfo="skip",
+    showlegend=True,
+    name='Confidence Interval'
+))
+
+fig.update_layout(
+    title="Forecasted Revenue with Confidence Interval",
+    xaxis_title="Date",
+    yaxis_title="Revenue",
+    template="plotly_white",
+    hovermode="x unified"
+)
+
 st.plotly_chart(fig, use_container_width=True)
 
-# Forecast Table
+# === Forecast Table === #
 st.subheader("🧾 Forecast Table")
 st.dataframe(
     forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_days).rename(
@@ -71,6 +110,6 @@ st.dataframe(
     )
 )
 
-# Export as CSV
+# === Export as CSV === #
 csv = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_days).to_csv(index=False)
 st.download_button("⬇️ Download Forecast CSV", csv, "forecast.csv", "text/csv")
