@@ -27,11 +27,8 @@ def get_snowflake_data():
     return df
 
 # === Streamlit App UI === #
-st.title("📈 Financial Forecasting App built on top of Snowflake Data")
-st.markdown("This app retrieves financial data from Snowflake and forecasts future revenue using Prophet.")
-
-# Forecast input
-forecast_days = st.slider("Select number of days to forecast:", min_value=30, max_value=365, value=90)
+st.title("📈 36-Month Financial Forecast (Snowflake + Prophet)")
+st.markdown("This app retrieves financial data from Snowflake and forecasts the next 36 months using Prophet.")
 
 # Load data
 with st.spinner("Connecting to Snowflake and fetching data..."):
@@ -46,12 +43,13 @@ st.line_chart(df.set_index('ds')['y'])
 model = Prophet()
 model.fit(df)
 
-# Make forecast
-future = model.make_future_dataframe(periods=forecast_days)
+# Forecast for next 36 months (~1080 days)
+forecast_period_days = 36 * 30
+future = model.make_future_dataframe(periods=forecast_period_days)
 forecast = model.predict(future)
 
-# === NEW: Best fit forecast chart with shaded confidence interval === #
-st.subheader("🔮 Forecasted Revenue (Best Fit Line)")
+# === Best fit forecast chart with shaded confidence interval === #
+st.subheader("🔮 36-Month Forecasted Revenue")
 
 # Separate historical and forecast parts
 historical = forecast[forecast['ds'] <= df['ds'].max()]
@@ -88,7 +86,7 @@ fig.add_trace(go.Scatter(
 ))
 
 fig.update_layout(
-    title="Forecasted Revenue with Confidence Interval",
+    title="36-Month Forecasted Revenue with Confidence Interval",
     xaxis_title="Date",
     yaxis_title="Revenue",
     template="plotly_white",
@@ -98,9 +96,9 @@ fig.update_layout(
 st.plotly_chart(fig, use_container_width=True)
 
 # === Forecast Table === #
-st.subheader("🧾 Forecast Table")
+st.subheader("🧾 36-Month Forecast Table")
 st.dataframe(
-    forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_days).rename(
+    forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_period_days).rename(
         columns={
             "ds": "Date",
             "yhat": "Predicted Revenue",
@@ -111,6 +109,5 @@ st.dataframe(
 )
 
 # === Export as CSV === #
-csv = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_days).to_csv(index=False)
-st.download_button("⬇️ Download Forecast CSV", csv, "forecast.csv", "text/csv")
-
+csv = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_period_days).to_csv(index=False)
+st.download_button("⬇️ Download 36-Month Forecast CSV", csv, "forecast_36_months.csv", "text/csv")
