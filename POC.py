@@ -17,7 +17,7 @@ def get_snowflake_data():
         schema=st.secrets["SCHEMA"]
     )
     query = """
-        SELECT ds, y
+        SELECT ds AS "ds", y AS "y"
         FROM forecast_data
         WHERE ds >= '2020-01-01'
         ORDER BY ds;
@@ -37,19 +37,20 @@ forecast_days = st.slider("Select number of days to forecast:", min_value=30, ma
 with st.spinner("Connecting to Snowflake and fetching data..."):
     df = get_snowflake_data()
 
+# Check and preview data
 st.subheader("📊 Historical Data")
 df['ds'] = pd.to_datetime(df['ds'])  # Ensure datetime format
 st.line_chart(df.set_index('ds')['y'])
 
-# Fit model
+# Fit Prophet model
 model = Prophet()
 model.fit(df)
 
-# Forecast
+# Make forecast
 future = model.make_future_dataframe(periods=forecast_days)
 forecast = model.predict(future)
 
-# Plot forecast
+# Show forecast chart
 st.subheader("🔮 Forecasted Revenue")
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat'], name='Forecast'))
