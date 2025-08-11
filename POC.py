@@ -41,7 +41,7 @@ st.subheader("📊 Historical Data")
 st.line_chart(df.set_index('ds')['y'])
 
 # Prepare and fit model
-#df = df.rename(columns={"date": "ds", "revenue": "y"})
+df = df.rename(columns={"ds": "ds", "y": "y"})
 df['ds'] = pd.to_datetime(df['ds'])
 
 
@@ -76,5 +76,6 @@ st.dataframe(
 # Export forecast as CSV
 csv = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(forecast_days).to_csv(index=False)
 st.download_button("⬇️ Download Forecast CSV", csv, "forecast.csv", "text/csv")
+
 
 
